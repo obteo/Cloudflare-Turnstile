@@ -1,5 +1,6 @@
 import { definePterodactylExtension } from '@pterodactyl/sdk';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface TurnstileApi {
     render(element: HTMLElement, options: Record<string, unknown>): string;
@@ -32,7 +33,7 @@ function loadScript(): Promise<void> {
 
 function Challenge() {
     const holder = useRef<HTMLDivElement>(null);
-    const [message, setMessage] = (requireState())('');
+    const [message, setMessage] = useState('');
     useEffect(() => {
         let active = true;
         const element = holder.current;
@@ -57,8 +58,44 @@ function Challenge() {
     return <div style={{ marginTop: 12, marginBottom: 12 }}><div ref={holder} />{message && <p role='alert'>{message}</p>}</div>;
 }
 // Keep React as an ordinary dependency managed by the SDK build.
-import { useState } from 'react';
-const requireState = () => useState;
+
+/** Password pages expose only page-level slots, outside AuthCard. Portal the challenge
+ * into the matching form without altering the Panel theme or the login page. */
+function PasswordFormChallenge() {
+    const [mount, setMount] = useState<HTMLDivElement | null>(null);
+    useEffect(() => {
+        const mountNode = document.createElement('div');
+        mountNode.dataset.cloudflareTurnstile = 'password-form';
+        let mounted = true;
+        const place = () => {
+            if (!mounted) return;
+            const form = Array.from(document.querySelectorAll('form')).find(candidate =>
+                candidate.querySelector('button[type="submit"]')
+            );
+            const submit = form?.querySelector('button[type="submit"]');
+            const buttonRow = submit?.parentElement;
+            // AuthCard puts the button in a dedicated div inside the form.
+            if (form && buttonRow && buttonRow.parentElement) {
+                if (mountNode.parentElement !== buttonRow.parentElement || mountNode.nextSibling !== buttonRow) {
+                    buttonRow.parentElement.insertBefore(mountNode, buttonRow);
+                }
+                setMount(mountNode);
+            }
+        };
+        place();
+        const observer = new MutationObserver(() => {
+            // React may rerender the password view after a form state update.
+            if (!mountNode.isConnected) place();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        return () => {
+            mounted = false;
+            observer.disconnect();
+            mountNode.remove();
+        };
+    }, []);
+    return mount ? createPortal(<Challenge />, mount) : null;
+}
 
 function protectedAuthUrl(url: string): boolean {
     const path = new URL(url, window.location.href).pathname.replace(/\/$/, '');
@@ -126,7 +163,7 @@ export default definePterodactylExtension({
         configuredKey = typeof config.site_key === 'string' ? config.site_key : '';
         installTransportAdapter();
         slots.register('auth.login.form.after', Challenge);
-        slots.register('auth.password.before', Challenge);
-        slots.register('auth.passwordReset.before', Challenge);
+        slots.register('auth.password.before', PasswordFormChallenge);
+        slots.register('auth.passwordReset.before', PasswordFormChallenge);
     },
 });

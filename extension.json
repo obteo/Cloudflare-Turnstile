@@ -1,7 +1,7 @@
 {
   "id": "cloudflare-turnstile",
   "name": "Cloudflare Turnstile",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Cloudflare Turnstile protection for login and password reset",
   "author": "Community",
   "requires": {
