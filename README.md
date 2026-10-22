@@ -31,7 +31,9 @@ cd extensions/cloudflare-turnstile
 npm install --legacy-peer-deps --install-links
 npm run typecheck
 npm run build
+
 cd /var/www/pterodactyl
+
 php artisan p:extension:install extensions/cloudflare-turnstile
 php artisan optimize:clear
 ```
