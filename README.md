@@ -20,7 +20,7 @@ Download the `cloudflare-turnstile-v1.0.2-source.zip` release asset, transfer it
 cd /var/www/pterodactyl
 unzip /root/cloudflare-turnstile-v1.0.2-source.zip -d extensions/
 cd extensions/cloudflare-turnstile
-npm install
+npm install --legacy-peer-deps --install-links
 npm run typecheck
 npm run build
 cd /var/www/pterodactyl
