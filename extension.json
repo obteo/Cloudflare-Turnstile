@@ -1,0 +1,21 @@
+{
+  "id": "cloudflare-turnstile",
+  "name": "Cloudflare Turnstile",
+  "version": "1.0.2",
+  "description": "Cloudflare Turnstile protection for login and password reset",
+  "author": "Community",
+  "requires": {
+    "panel": "^2.0.0-dev",
+    "sdk": ">=2.0.0-beta.4 <3.0",
+    "php": "^8.3"
+  },
+  "provider": "CloudflareTurnstile\\TurnstileProvider",
+  "autoload": {
+    "CloudflareTurnstile\\": "src"
+  },
+  "ui": {
+    "entry": "dist/client.js",
+    "mode": "native",
+    "prefix": "cft"
+  }
+}
