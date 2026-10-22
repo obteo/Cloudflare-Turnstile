@@ -3,7 +3,7 @@
   "name": "Cloudflare Turnstile",
   "version": "1.0.3",
   "description": "Cloudflare Turnstile protection for login and password reset",
-  "author": "Community",
+  "author": "Teo",
   "requires": {
     "panel": "^2.0.0-dev",
     "sdk": ">=2.0.0-beta.4 <3.0",
